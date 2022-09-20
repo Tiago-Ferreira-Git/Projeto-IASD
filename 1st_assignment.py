@@ -14,6 +14,7 @@ for i in range(1,4):
                         puzzle_dimension = int(word[0])
                     except ValueError: 
                         print("Dimension not valid")
+                        exit()
                 else:
                     board.append(word)
 
