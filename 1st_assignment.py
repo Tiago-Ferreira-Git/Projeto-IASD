@@ -34,6 +34,7 @@ def isSolution(board:list,tupple)->bool:
 
 print(find_initial(board))
 
+#check
     
     
    
