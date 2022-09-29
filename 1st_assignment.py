@@ -1,6 +1,6 @@
 #just opens some examples to check if parsing is done right. Change it to be type .dat and this is basically the load func. board
 # will be a list of lists (list of rows and each row is a list of col)
-
+from os import listdir
 
 
 def get_board():
@@ -29,7 +29,8 @@ def get_board():
 
 
 class RTBProblem():
-
+    board = None
+    initial_index = None
     def __init__(self) -> None:
         pass
 
@@ -37,26 +38,32 @@ class RTBProblem():
         """Just opens some examples to check if parsing is done right. 
         Change it to be type .dat and this is basically the load func. 
         board will be a list of lists (list of rows and each row is a list of col)"""
-
-        for i in range(1,2):
-            with open("exemplo{}.txt".format(i),"r") as file:
-                board = list()
-                for line in file:
-                    line = line.rstrip("\n")
-                    if line.startswith('#'):
-                        continue
-                    else:
-                        word = line.split(" ")
-                        if len(word) == 1:
-                            try:
-                                puzzle_dimension = int(word[0])
-                            except ValueError: 
-                                print("Dimension not valid")
-                                exit()
-                        else:
-                            board.append(word)
-        self.board = [['right-down', 'right-left', 'right-left', 'initial-left'], ['right-top', 'right-left', 'right-left', 'left-down'], ['goal-right', 'right-left', 'right-left', 'left-top'], ['empty-cell', 'empty-cell', 'right-left', 'empty-cell']]
-
+        board = list()
+        for line in fh:
+            line = line.rstrip("\n")
+            if line.startswith('#'):
+                continue
+            else:
+                words = line.split(" ")
+                if len(words) == 1:
+                    try:
+                        puzzle_dimension = int(words[0])
+                        i = 0
+                    except ValueError: 
+                        print("Dimension not valid")
+                        exit()
+                else:
+                    j = 0
+                    for word in words:
+                        if len(word) > 7:
+                            if word[:7] == "initial":
+                                self.initial_index = (i,j)
+                        
+                        j += 1
+                    
+                    board.append(words)
+                    i += 1
+        self.board = board
     def printb(self):
         print(self.board)    
 
@@ -71,19 +78,19 @@ class RTBProblem():
         
     def isSolution(self):
         # find the initial tile
-        i,j = self.find_initial()
-        print(i, j)
+        i,j = self.find_initial()  #i,j = self.intial_index
+        print((i, j),self.initial_index)
         # find where the next tile in path must be
         next = self.board[i][j].split("-")
         next = next[1]
         # move search to the next tile
         while next != "no" and next != "goal":
             i, j, next = self.check(i, j, next)
-            print(i, j)
+            #print(i, j)
         if next == "no":
-            return 0
+            return False
         elif next == "goal":
-            return 1
+            return True
         else:
             print("tenso, algo deu merda")
             exit()
@@ -92,7 +99,7 @@ class RTBProblem():
         i, j = move(i, j, next)
         current = self.board[i][j].split("-")
         prev = reverse(next)
-        print(prev)
+        #print(prev)
         if current[0] == prev:
             next = current[1]
         elif current[1] == prev:
@@ -130,10 +137,16 @@ def reverse(str):
 
 
 if __name__ == "__main__":
-    rtbp = RTBProblem()
-    rtbp.load("exemplo3.txt")
-    rtbp.printb()
-    print(rtbp.isSolution())
+    
+    for files in listdir():
+        if files[-3:] == "dat":
+            with open(files,"r") as fh:
+                rtbp = RTBProblem()
+                rtbp.load(fh)
+                rtbp.isSolution()
+                #rtbp.printb()
+                #print(files)
+                #print(rtbp.isSolution())
     
 
    
