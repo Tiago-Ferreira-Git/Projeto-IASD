@@ -1,4 +1,5 @@
 from os import listdir
+import time
 
 
 """
@@ -18,7 +19,7 @@ Variables:
 class RTBProblem():
     board = None
     initial_index = None
-    
+    puzzle_dimention = None
     
     def __init__(self) -> None:
         pass
@@ -49,7 +50,7 @@ class RTBProblem():
                 words = line.split(" ")
                 if len(words) == 1:
                     try:
-                        puzzle_dimension = int(words[0])
+                        self.puzzle_dimention = int(words[0])
                         i = 0
                     except ValueError: 
                         print("Dimension not valid")
@@ -137,18 +138,27 @@ class RTBProblem():
     """
     def Check(self, i, j, next):
         i, j = move(i, j, next)
-        current = self.board[i][j].split("-")
-        prev = reverse(next)
-        if current[0] == prev:
-            next = current[1]
-        elif current[1] == prev:
-            next = current[0]
+        if (0 <= j < self.puzzle_dimention) and (0 <= i < self.puzzle_dimention):     
+            current = self.board[i][j].split("-")
+            prev = reverse(next)
+            if current[0] == prev:
+                next = current[1]
+            elif current[1] == prev:
+                next = current[0]
+            else:
+                return i, j, "no"
+            return i, j, next
         else:
-            return i, j, "no"
-        return i, j, next
+            return 0,0,"no"
+
+           
+"""
+return 0,0,"no"
+        else: 
+            
 
 
-
+"""
 """ 
 Name of the function: move
     
@@ -209,9 +219,10 @@ if __name__ == "__main__":
     for files in listdir():
         if files[-3:] == "dat":
             with open(files,"r") as fh:
-                print(files)
+                
                 rtbp = RTBProblem()
                 rtbp.Load(fh)
+                start_time = time.time()
                 print(rtbp.isSolution())
-
+                print(f"No ficheiro {files} demorou {time.time()-start_time}")
     

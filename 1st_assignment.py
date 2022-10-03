@@ -78,8 +78,7 @@ class RTBProblem():
         
     def isSolution(self):
         # find the initial tile
-        i,j = self.find_initial()  #i,j = self.intial_index
-        print((i, j),self.initial_index)
+        i,j = self.initial_index
         # find where the next tile in path must be
         next = self.board[i][j].split("-")
         next = next[1]
@@ -140,19 +139,14 @@ if __name__ == "__main__":
     
     for files in listdir():
         if files[-3:] == "dat":
-            with open(files,"r") as fh:
+            with open("pub08.dat","r") as fh:
                 rtbp = RTBProblem()
                 rtbp.load(fh)
-                rtbp.isSolution()
+                #rtbp.isSolution()
                 #rtbp.printb()
                 #print(files)
-                #print(rtbp.isSolution())
-    
+                print(rtbp.isSolution())
+
 
    
    
-#comentário
-#tamanho do puzzle
-#configuração do puzzle linha por linha
-#N caracteres separados por um espaço
-#files termina com um espaço em branco
