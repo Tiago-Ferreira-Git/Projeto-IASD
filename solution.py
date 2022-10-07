@@ -41,7 +41,7 @@ class RTBProblem(search.Problem):
         
     Return: Does not return anything.   
     """
-    def Load(self, fh):
+    def load(self, fh):
         board = list()
         for line in fh:           
             line = line.rstrip("\n")           
