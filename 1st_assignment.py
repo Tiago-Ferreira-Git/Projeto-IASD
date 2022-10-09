@@ -107,32 +107,32 @@ class RTBProblem():
             return i, j, "no"
         return i, j, next
 
-def move(i, j, next):
-    #print(next)
-    if next == "left":
-        j-=1
-    elif next == "right":
-        j+=1
-    elif next == "top":
-        i-=1
-    elif next == "down":
-        i+=1
-    else:
-        print("error")
-        exit()
-    return (i, j)
+    def move(i, j, next):
+        #print(next)
+        if next == "left":
+            j-=1
+        elif next == "right":
+            j+=1
+        elif next == "top":
+            i-=1
+        elif next == "down":
+            i+=1
+        else:
+            print("error")
+            exit()
+        return (i, j)
 
-def reverse(str):
-    if str == "left":
-        return("right")
-    elif str == "right":
-        return("left")
-    elif str == "top":
-        return("down")
-    elif str == "down":
-        return("top")
-    else:
-        return "goal"
+    def reverse(str):
+        if str == "left":
+            return("right")
+        elif str == "right":
+            return("left")
+        elif str == "top":
+            return("down")
+        elif str == "down":
+            return("top")
+        else:
+            return "goal"
 
 
 if __name__ == "__main__":

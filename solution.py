@@ -152,34 +152,34 @@ class RTBProblem(search.Problem):
         else:
             return 0,0,"no"
 
-           
-""" 
-Name of the function: move
-    
-Description: Simulates the movement of the ball between the tiles depending 
-on the move to be made, passed by argument in the variable "next". As it moves 
-to the next tile, it also updates the coordinates of the ball.
-    
-Parameters:
-    i: Current coordinate of the ball on the rows of the puzzle
-    j: Current coordinate of the ball on the columns of the puzzle
-    next: next move to be made by the ball in the puzzle
-    
-Return: Returns the new coordinates of the ball in the RTB puzzle
-"""   
-def move(i, j, next):
-    if next == "left":
-        j-=1
-    elif next == "right":
-        j+=1
-    elif next == "top":
-        i-=1
-    elif next == "down":
-        i+=1
-    else:
-        print("Something went wrong.")
-        exit()
-    return (i, j)
+            
+    """ 
+    Name of the function: move
+        
+    Description: Simulates the movement of the ball between the tiles depending 
+    on the move to be made, passed by argument in the variable "next". As it moves 
+    to the next tile, it also updates the coordinates of the ball.
+        
+    Parameters:
+        i: Current coordinate of the ball on the rows of the puzzle
+        j: Current coordinate of the ball on the columns of the puzzle
+        next: next move to be made by the ball in the puzzle
+        
+    Return: Returns the new coordinates of the ball in the RTB puzzle
+    """   
+    def move(i, j, next):
+        if next == "left":
+            j-=1
+        elif next == "right":
+            j+=1
+        elif next == "top":
+            i-=1
+        elif next == "down":
+            i+=1
+        else:
+            print("Something went wrong.")
+            exit()
+        return (i, j)
 
 
 
