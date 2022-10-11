@@ -1,4 +1,4 @@
-from pip import main
+from os import listdir
 import search
 
 
@@ -7,8 +7,10 @@ class RTBProblem(search.Problem):
     initial = None
     algorithm = None
     initial_index = None
+    blank = None
     def __init__(self) -> None:
         self.setAlgorithm()
+        self.blank = []
         pass
       
 
@@ -32,12 +34,16 @@ class RTBProblem(search.Problem):
                     for word in words:
                         if len(word) > 7:
                             if word[:7] == "initial":
-                                self.initial_index = (i,j)               
+                                self.initial_index = (i,j)
+                        if word == "empty-cell":
+                            self.blank.append((i,j))               
                         j += 1
                     
                     board.append(words)
+                    if(i == self.puzzle_dimension-1): break
                     i += 1
-        self.initial = board
+        self.initial = *(tuple(row) for row in board),
+        #self.initial.append(self.blank)
      
         
 
@@ -49,42 +55,78 @@ class RTBProblem(search.Problem):
     def result(self, state,action):
         """Return  the state that results from executing the given action""" 
         i,j,move = action
+        
+        state = list(state)
 
         if move == "up":
+            state[i] = list(state[i])
+            state[i-1] = list(state[i-1])
             state[i][j],state[i-1][j] = state[i-1][j],state[i][j]
+            state[i] = tuple(state[i])
+            state[i-1] = tuple(state[i-1])
+            state = tuple(state)
+            #state[-1].append((i-1,j))
             return state
         elif move == "down":
-            
+            state[i] = list(state[i])
+            state[i+1] = list(state[i+1])
             state[i][j],state[i+1][j] = state[i+1][j],state[i][j]
+            state[i] = tuple(state[i])
+            state[i+1] = tuple(state[i+1])
+            state = tuple(state)
+            #state[-1].append((i+1,j))
             return state
 
-        elif move == "left":    
+        elif move == "left": 
+            state[i] = list(state[i])
             state[i][j],state[i][j-1] = state[i][j-1],state[i][j]
+            state[i] = tuple(state[i])
+            state = tuple(state)
+            #state[-1].append((i,j-1))
             return state
 
         elif move == "right":        
+            state[i] = list(state[i])
             state[i][j],state[i][j+1] = state[i][j+1],state[i][j]
+            state[i] = tuple(state[i])
+            state = tuple(state)
+            #state[-1].append((i,j+1))
             return state
-        else:
-            return state #?
+
     def actions(self, state):
         """Return the state that can be executed in the given state"""
         blank_spaces = list()
+        """
+        for i,j in state[-1]:
+            if(j+1 < self.puzzle_dimension):
+                if((state[i][j+1])[:-3] != "not" and (state[i][j+1])[:7] != "initial"  and (state[i][j+1])[:4] != "goal"):
+                    blank_spaces.append((i,j,"right"))
+            if(0 <= i-1):
+                if((state[i-1][j])[:-3] != "not" and (state[i-1][j])[:7] != "initial"  and (state[i-1][j])[:4] != "goal"):
+                    blank_spaces.append((i,j,"up"))
+            if( 0 <= j-1):
+                if((state[i][j-1])[:-3] != "not" and (state[i][j-1])[:7] != "initial"  and (state[i][j-1])[:4] != "goal"):
+                    blank_spaces.append((i,j,"left"))
+            if(i+1 < self.puzzle_dimension):
+                if((state[i+1][j])[:-3] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
+                    blank_spaces.append((i,j,"down"))
+        """
         for i,row in enumerate(state):
             for j,column in enumerate(row):
                 if (state[i][j])[:5] == "empty":
                     if(j+1 < self.puzzle_dimension):
-                        if((state[i][j+1])[-3:]) != "not":
+                        if((state[i][j+1])[:-3] != "not" and (state[i][j+1])[:7] != "initial"  and (state[i][j+1])[:4] != "goal"):
                             blank_spaces.append((i,j,"right"))
                     if(0 <= i-1):
-                        if((state[i-1][j])[-3:]) != "not":
+                        if((state[i-1][j])[:-3] != "not" and (state[i-1][j])[:7] != "initial"  and (state[i-1][j])[:4] != "goal"):
                             blank_spaces.append((i,j,"up"))
                     if( 0 <= j-1):
-                        if((state[i][j-1])[-3:]) != "not":
+                        if((state[i][j-1])[:-3] != "not" and (state[i][j-1])[:7] != "initial"  and (state[i][j-1])[:4] != "goal"):
                             blank_spaces.append((i,j,"left"))
                     if(i+1 < self.puzzle_dimension):
-                        if((state[i+1][j])[-3:]) != "not":
+                        if((state[i+1][j])[:-3] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
                             blank_spaces.append((i,j,"down"))
+        
         return blank_spaces
         
 
@@ -96,7 +138,7 @@ class RTBProblem(search.Problem):
         return self.isSolution(state)
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.depth_first_tree_search
+        self.algorithm = search.breadth_first_graph_search
         pass
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
@@ -169,8 +211,13 @@ def reverse(str):
         return "goal"
 
 if __name__ == '__main__':
-    with open("teste/pub02.dat") as fh:
-        teste = RTBProblem()
-        teste.load(fh)
-        teste.solve()
-        print("done")
+    for files in listdir("teste"):
+        if files[-3:] == "dat":
+            with open("teste/"+files,"r") as fh:
+                print(files)
+                teste = RTBProblem()
+                teste.load(fh)
+                print(teste.solve())
+                print("done")
+
+

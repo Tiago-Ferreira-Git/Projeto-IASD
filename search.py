@@ -244,6 +244,7 @@ def breadth_first_graph_search(problem):
     node = Node(problem.initial)
     if problem.goal_test(node.state):
         return node
+    
     frontier = deque([node])
     explored = set()
     while frontier:
