@@ -121,11 +121,11 @@ class RTBProblem(search.Problem):
         return self.isSolution(state)
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.depth_limited_search
+        self.algorithm = search.breadth_first_graph_search
         pass
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
-        return self.algorithm(self,limit=20)
+        return self.algorithm(self)
 
 
 
