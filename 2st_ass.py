@@ -121,11 +121,11 @@ class RTBProblem(search.Problem):
         return self.isSolution(state)
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.iterative_deepening_search
+        self.algorithm = search.depth_limited_search
         pass
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
-        return self.algorithm(self)
+        return self.algorithm(self,limit=20)
 
 
 
@@ -202,7 +202,7 @@ if __name__ == '__main__':
                 teste = RTBProblem()
                 teste.setAlgorithm()
                 teste.load(fh)
-                teste.solve()
+                print(teste.solve())
                 print(f"No ficheiro {files} demorou {time.time()-start_time}")
 
 

@@ -59,7 +59,7 @@ class RTBProblem(search.Problem):
         state = list(state)
         for g,tupple in enumerate(state[-1]):
             if tupple == (i,j):
-                state[-1] = state[-1][:i] + state[-1][i+1:]
+                state[-1] = state[-1][:g] + state[-1][g+1:]
         if move == "up":
             state[i] = list(state[i])
             state[i-1] = list(state[i-1])
@@ -112,23 +112,6 @@ class RTBProblem(search.Problem):
             if(i+1 < self.puzzle_dimension):
                 if((state[i+1][j])[-3:] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
                     blank_spaces.append((i,j,"down"))
-        """
-        for i,row in enumerate(state):
-            for j,column in enumerate(row):
-                if (state[i][j])[:5] == "empty":
-                    if(j+1 < self.puzzle_dimension):
-                        if((state[i][j+1])[:-3] != "not" and (state[i][j+1])[:7] != "initial"  and (state[i][j+1])[:4] != "goal"):
-                            blank_spaces.append((i,j,"right"))
-                    if(0 <= i-1):
-                        if((state[i-1][j])[:-3] != "not" and (state[i-1][j])[:7] != "initial"  and (state[i-1][j])[:4] != "goal"):
-                            blank_spaces.append((i,j,"up"))
-                    if( 0 <= j-1):
-                        if((state[i][j-1])[:-3] != "not" and (state[i][j-1])[:7] != "initial"  and (state[i][j-1])[:4] != "goal"):
-                            blank_spaces.append((i,j,"left"))
-                    if(i+1 < self.puzzle_dimension):
-                        if((state[i+1][j])[:-3] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
-                            blank_spaces.append((i,j,"down"))
-        """
         
         return blank_spaces
         
@@ -141,11 +124,11 @@ class RTBProblem(search.Problem):
         return self.isSolution(state)
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.depth_limited_search
+        self.algorithm = search.iterative_deepening_search
         pass
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
-        return self.algorithm(self,limit=5)
+        return self.algorithm(self)
 
 
 
@@ -213,15 +196,15 @@ def reverse(str):
         return "goal"
 
 if __name__ == '__main__':
-    for files in listdir("teste"):
-        if files[-3:] == "dat":
-            with open("teste/"+files,"r") as fh:
-                #print(files)
-                start_time = time.time()
-                teste = RTBProblem()
-                teste.setAlgorithm()
-                teste.load(fh)
-                teste.solve()
-                print(f"No ficheiro {files} demorou {time.time()-start_time}")
+    #for files in listdir("teste"):
+        #if files[-3:] == "dat":
+    with open("teste/"+"pub07.dat","r") as fh:
+        #print(files)
+        start_time = time.time()
+        teste = RTBProblem()
+        teste.setAlgorithm()
+        teste.load(fh)
+        print(teste.solve())
+        #print(f"No ficheiro {files} demorou {time.time()-start_time}")
 
 
