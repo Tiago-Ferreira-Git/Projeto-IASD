@@ -1,7 +1,6 @@
 from os import listdir
 import search
 import time
-
 class RTBProblem(search.Problem):
     puzzle_dimension = None
     initial = None
@@ -9,12 +8,14 @@ class RTBProblem(search.Problem):
     initial_index = None
     blank = None
     def __init__(self) -> None:
-        self.blank = []
+        self.blank = tuple()
+        self.initial = ()
+    
         pass
       
 
     def load(self, fh):
-        board = tuple()
+        board = (())
         for line in fh:           
             line = line.rstrip("\n")           
             if line.startswith('#'):
@@ -35,15 +36,15 @@ class RTBProblem(search.Problem):
                             if word[:7] == "initial":
                                 self.initial_index = (i,j)
                         if word == "empty-cell":
-                            self.blank.append((i,j))               
+                            self.blank += (i,j),        
                         j += 1
                     
-                    board += (tuple(words)),
+                    board += (tuple(words))
                     if(i == self.puzzle_dimension-1): break
                     i += 1
-        self.initial = board
-        self.initial += (self.blank,)
-        
+        self.initial += (board),
+        self.initial +=  (self.blank,)
+        #print(self.initial)
      
         
 
@@ -55,44 +56,31 @@ class RTBProblem(search.Problem):
     def result(self, state,action):
         """Return  the state that results from executing the given action""" 
         i,j,move = action   
-        state = list(state)
-        for g,tupple in enumerate(state[-1]):
-            if tupple == (i,j):
-                state[-1] = state[-1][:g] + state[-1][g+1:]
+        board = ()
+        blank = ()
+        new_state = ()
+        
+        
+        board = list(state[0])
         if move == "up":
-            state[i] = list(state[i])
-            state[i-1] = list(state[i-1])
-            state[i][j],state[i-1][j] = state[i-1][j],state[i][j]
-            state[i] = tuple(state[i])
-            state[i-1] = tuple(state[i-1])
-            state[-1] = state[-1] + ((i-1,j),)         
-            state = tuple(state)
-            return state
+            board[(i * self.puzzle_dimension)+j], board[((i-1) * self.puzzle_dimension)+j] =  board[((i-1) * self.puzzle_dimension)+j], board[(i * self.puzzle_dimension)+j]
+            blank +=  ((i-1,j),)   
         elif move == "down":
-            state[i] = list(state[i])
-            state[i+1] = list(state[i+1])
-            state[i][j],state[i+1][j] = state[i+1][j],state[i][j]
-            state[i] = tuple(state[i])
-            state[i+1] = tuple(state[i+1])
-            state[-1] = state[-1] + ((i+1,j),)   
-            state = tuple(state)
-            return state
+            board[(i * self.puzzle_dimension)+j], board[((i+1) * self.puzzle_dimension)+j]=  board[((i+1) * self.puzzle_dimension)+j], board[(i * self.puzzle_dimension)+j]
+            blank +=  ((i+1,j),) 
 
         elif move == "left": 
-            state[i] = list(state[i])
-            state[i][j],state[i][j-1] = state[i][j-1],state[i][j]
-            state[i] = tuple(state[i])
-            state[-1] = state[-1] + ((i,j-1),)       
-            state = tuple(state)
-            return state
-
-        elif move == "right":        
-            state[i] = list(state[i])
-            state[i][j],state[i][j+1] = state[i][j+1],state[i][j]
-            state[i] = tuple(state[i])
-            state[-1] = state[-1] + ((i,j+1),)   
-            state = tuple(state)
-            return state
+            board[(i * self.puzzle_dimension)+j], board[(i * self.puzzle_dimension)+j-1] =  board[(i * self.puzzle_dimension)+j-1], board[(i * self.puzzle_dimension)+j]
+            blank +=  ((i,j-1),)     
+        elif move == "right":      
+            board[(i * self.puzzle_dimension)+j], board[(i * self.puzzle_dimension)+j+1] =  board[(i * self.puzzle_dimension)+j+1], board[(i * self.puzzle_dimension)+j]
+            blank +=  ((i,j+1),)
+        for g,tupple in enumerate(state[1]):
+            if tupple == (i,j):
+                blank += state[1][:g] + state[1][g+1:]
+        new_state += (tuple(board)),
+        new_state +=  (blank,)
+        return new_state
 
     def actions(self, state):
         """Return the state that can be executed in the given state"""
@@ -100,16 +88,16 @@ class RTBProblem(search.Problem):
         
         for i,j in state[-1]:
             if(j+1 < self.puzzle_dimension):
-                if((state[i][j+1])[-3:] != "not" and (state[i][j+1])[:7] != "initial"  and (state[i][j+1])[:4] != "goal"):
+                if((state[0][(i * self.puzzle_dimension)+j+1])[-3:] != "not" and (state[0][(i * self.puzzle_dimension)+j+1])[:7] != "initial"  and (state[0][(i * self.puzzle_dimension)+j+1])[:4] != "goal"):
                     blank_spaces.append((i,j,"right"))
             if(0 <= i-1):
-                if((state[i-1][j])[-3:] != "not" and (state[i-1][j])[:7] != "initial"  and (state[i-1][j])[:4] != "goal"):
+                if((state[0][((i-1) * self.puzzle_dimension)+j])[-3:] != "not" and (state[0][((i-1) * self.puzzle_dimension)+j])[:7] != "initial"  and (state[0][((i-1) * self.puzzle_dimension)+j])[:4] != "goal"):
                     blank_spaces.append((i,j,"up"))
             if( 0 <= j-1):
-                if((state[i][j-1])[-3:] != "not" and (state[i][j-1])[:7] != "initial"  and (state[i][j-1])[:4] != "goal"):
+                if((state[0][((i) * self.puzzle_dimension)+j-1])[-3:] != "not" and (state[0][((i) * self.puzzle_dimension)+j-1])[:7] != "initial"  and (state[0][((i) * self.puzzle_dimension)+j-1])[:4] != "goal"):
                     blank_spaces.append((i,j,"left"))
             if(i+1 < self.puzzle_dimension):
-                if((state[i+1][j])[-3:] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
+                if((state[0][((i+1) * self.puzzle_dimension)+j])[-3:] != "not" and (state[0][((i+1) * self.puzzle_dimension)+j])[:7] != "initial"  and (state[0][((i+1) * self.puzzle_dimension)+j])[:4] != "goal"):
                     blank_spaces.append((i,j,"down"))
         
         return blank_spaces
@@ -123,21 +111,21 @@ class RTBProblem(search.Problem):
         return self.isSolution(state)
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.iterative_deepening_search
+        self.algorithm = search.depth_limited_search
         pass
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
-        return self.algorithm(self)
+        return self.algorithm(self,limit=10)
 
 
 
     def isSolution(self,state):
         
-        self.board = state[:-1]
+        self.board = state[0]
         # register in i,j the coordinates of the initial tile
         i,j = self.initial_index
         # find where the next tile in path must be
-        next = self.board[i][j].split("-")
+        next = self.board[(i * self.puzzle_dimension)+j].split("-")
         next = next[1]
         # move search to the next tile
         while next != "no" and next != "goal":
@@ -155,7 +143,7 @@ class RTBProblem(search.Problem):
     def Check(self, i, j, next):
         i, j = move(i, j, next)
         if (0 <= j < self.puzzle_dimension) and (0 <= i < self.puzzle_dimension):     
-            current = self.board[i][j].split("-")
+            current = self.board[(i * self.puzzle_dimension)+j].split("-")
             prev = reverse(next)
             if current[0] == prev:
                 next = current[1]
@@ -195,15 +183,15 @@ def reverse(str):
         return "goal"
 
 if __name__ == '__main__':
-    #for files in listdir("teste"):
-        #if files[-3:] == "dat":
-    with open("teste/"+"pub07.dat","r") as fh:
-        #print(files)
-        start_time = time.time()
-        teste = RTBProblem()
-        teste.setAlgorithm()
-        teste.load(fh)
-        print(teste.solve())
-        #print(f"No ficheiro {files} demorou {time.time()-start_time}")
+    for files in listdir("teste"):
+        if files[-3:] == "dat":
+            with open("teste/"+files,"r") as fh:
+                #print(files)
+                start_time = time.time()
+                teste = RTBProblem()
+                teste.setAlgorithm()
+                teste.load(fh)
+                print(teste.solve())
+                print(f"No ficheiro {files} demorou {time.time()-start_time}")
 
 
