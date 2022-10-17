@@ -31,7 +31,7 @@ class RTBProblem(search.Problem):
                         exit()
                 else:
                     j = 0
-                    for word in words:
+                    for index,word in enumerate(words):
                         if len(word) > 7:
                             if word[:7] == "initial":
                                 self.initial_index = (i,j)
@@ -79,6 +79,8 @@ class RTBProblem(search.Problem):
             if tupple == (i,j):
                 blank += state[1][:g] + state[1][g+1:]
         new_state += (tuple(board)),
+        blank = list(blank)
+        blank = tuple(sorted(blank, key=lambda tup: (tup[0]*self.puzzle_dimension)+tup[1]))
         new_state +=  (blank,)
         return new_state
 
@@ -183,15 +185,15 @@ def reverse(str):
         return "goal"
 
 if __name__ == '__main__':
-    for files in listdir("teste"):
-        if files[-3:] == "dat":
-            with open("teste/"+files,"r") as fh:
-                #print(files)
-                start_time = time.time()
-                teste = RTBProblem()
-                teste.setAlgorithm()
-                teste.load(fh)
-                print(teste.solve())
-                print(f"No ficheiro {files} demorou {time.time()-start_time}")
+    #for files in listdir("teste"):
+    #    if files[-3:] == "dat":
+    with open("teste/"+"pub06.dat","r") as fh:
+        #print(files)
+        start_time = time.time()
+        teste = RTBProblem()
+        teste.setAlgorithm()
+        teste.load(fh)
+        print(teste.solve())
+        print(f"No ficheiro pub06 demorou {time.time()-start_time}")
 
 
