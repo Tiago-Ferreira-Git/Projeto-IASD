@@ -193,16 +193,16 @@ def reverse(str):
         return "goal"
 
 if __name__ == '__main__':
-    for files in listdir("teste"):
-        if files[-3:] == "dat":
+    #for files in listdir("teste"):
+        #if files[-3:] == "dat":
             #files
-            with open("teste/"+files,"r") as fh:
-                #print(files)
-                start_time = time.time()
-                teste = RTBProblem()
-                teste.setAlgorithm()
-                teste.load(fh)
-                print(teste.solve())
-                print(f"No ficheiro {files} demorou {time.time()-start_time}")
+    with open("teste/"+"pub10.dat","r") as fh:
+        #print(files)
+        start_time = time.time()
+        teste = RTBProblem()
+        teste.setAlgorithm()
+        teste.load(fh)
+        print(teste.solve())
+        #print(f"No ficheiro {files} demorou {time.time()-start_time}")
 
 
