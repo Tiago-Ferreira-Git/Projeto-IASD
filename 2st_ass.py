@@ -14,6 +14,9 @@ class RTBProblem(search.Problem):
       
 
     def load(self, fh):
+        initial_blank = False
+        blanks = None
+        first = 0
         board = list()
         for line in fh:           
             line = line.rstrip("\n")           
@@ -30,20 +33,27 @@ class RTBProblem(search.Problem):
                         exit()
                 else:
                     j = 0
-                    for word in words:
+                    board.append(words)
+                    for index,word in enumerate(words):
                         if len(word) > 7:
                             if word[:7] == "initial":
                                 self.initial_index = (i,j)
-                        if word == "empty-cell":
-                            self.blank.append((i,j))               
+                        if word == "empty-cell":     
+                            if not initial_blank:
+                                initial_blank = True
+                                first = (i * self.puzzle_dimension)+j
+                                blanks = (i,j)
+                            else:
+                                board[blanks[0]][blanks[1]] = f"{i}{j}"
+                                blanks = (i,j)             
                         j += 1
-                    
-                    board.append(words)
+
                     if(i == self.puzzle_dimension-1): break
                     i += 1
         #self.initial = board
         #self.initial.append(self.blank)
-        self.initial = *(tuple(row) for row in board),
+        print(board)
+        self.initial = *(tuple(row) for row in board), + (first),
         
      
         
@@ -55,67 +65,107 @@ class RTBProblem(search.Problem):
     
     def result(self, state,action):
         """Return  the state that results from executing the given action""" 
-        i,j,move = action
+        print()
+        i,j,move,prev = action[0]
         
-        state = list(state)
+        state = list(state) 
+        if prev !="i":
+            state[prev[0]] = list(state[prev[0]])         
+            
         if move == "up":
             state[i] = list(state[i])
             state[i-1] = list(state[i-1])
             state[i][j],state[i-1][j] = state[i-1][j],state[i][j]
+            if prev != "i": 
+                print(type(state[prev[0]][prev[1]]))
+                state[prev[0]][prev[1]] = f"{i-1}{j}"
+            else:
+                state[-1] = ((i-1) * self.puzzle_dimension)+j
             state[i] = tuple(state[i])
-            state[i-1] = tuple(state[i-1])     
+            state[i-1] = tuple(state[i-1])
+            if prev != "i":
+                if(type(state[prev[0]]) != tuple): state[prev[0]] = tuple(state[prev[0]])
             state = tuple(state)
-            return state
         elif move == "down":
             state[i] = list(state[i])
             state[i+1] = list(state[i+1])
             state[i][j],state[i+1][j] = state[i+1][j],state[i][j]
+            if prev != "i": 
+                state[prev[0]][prev[1]] = f"{i+1}{j}"
+            else:
+                state[-1] = ((i+1) * self.puzzle_dimension)+j
             state[i] = tuple(state[i])
             state[i+1] = tuple(state[i+1])
+            if prev != "i":
+                if(type(state[prev[0]]) != tuple): state[prev[0]] = tuple(state[prev[0]])
+            
             state = tuple(state)
-            return state
 
         elif move == "left": 
             state[i] = list(state[i])
             state[i][j],state[i][j-1] = state[i][j-1],state[i][j]
-            state[i] = tuple(state[i])    
+            if prev != "i": 
+                state[prev[0]][prev[1]] = f"{i}{j-1}"
+            else:
+                state[-1] = ((i) * self.puzzle_dimension)+j-1
+            state[i] = tuple(state[i])   
+            if prev != "i":
+                if(type(state[prev[0]]) != tuple): state[prev[0]] = tuple(state[prev[0]])
+             
             state = tuple(state)
-            return state
 
         elif move == "right":        
             state[i] = list(state[i])
             state[i][j],state[i][j+1] = state[i][j+1],state[i][j]
             state[i] = tuple(state[i])
+            if prev != "i": 
+                state[prev[0]][prev[1]] = f"{i}{j+1}"
+            else:
+                state[-1] = ((i) * self.puzzle_dimension)+j+1
+            if prev != "i":
+                if(type(state[prev[0]]) != tuple): state[prev[0]] = tuple(state[prev[0]])
+            
             state = tuple(state)
-            return state
+        return state
 
     def actions(self, state):
         """Return the state that can be executed in the given state"""
         blank_spaces = list()
-        
-        for i,row in enumerate(state):
-            for j,column in enumerate(row):
-                if (state[i][j])[:5] == "empty":
-                    if(j+1 < self.puzzle_dimension):
-                        if((state[i][j+1])[-3:] != "not" and (state[i][j+1])[:7] != "initial"  and (state[i][j+1])[:4] != "goal"):
-                            blank_spaces.append((i,j,"right"))
-                    if(0 <= i-1):
-                        if((state[i-1][j])[-3:] != "not" and (state[i-1][j])[:7] != "initial"  and (state[i-1][j])[:4] != "goal"):
-                            blank_spaces.append((i,j,"up"))
-                    if( 0 <= j-1):
-                        if((state[i][j-1])[-3:] != "not" and (state[i][j-1])[:7] != "initial"  and (state[i][j-1])[:4] != "goal"):
-                            blank_spaces.append((i,j,"left"))
-                    if(i+1 < self.puzzle_dimension):
-                        if((state[i+1][j])[-3:] != "not" and (state[i+1][j])[:7] != "initial"  and (state[i+1][j])[:4] != "goal"):
-                            blank_spaces.append((i,j,"down"))
+        initial = state[-1]
+        i = int(initial/self.puzzle_dimension)
+        j = initial%self.puzzle_dimension
+        next = state[i][j]
+        blank_spaces.append(self.verify(i,j,state,"i"))
+        while True:
+            g,h = next
+            g,h = int(g),int(h) 
+            if state[g][h][0] == "e" :break   
+            i,j = state[g][h]
+            i,j = int(i),int(j)
+            blank_spaces.append(self.verify(g,h,state,(i,j)))
+            i,j = g,h
+            next = state[i][j]
+
+            
        
         
         return blank_spaces
         
-
-
-
-        pass
+    def verify(self,i,j,state,condition):
+        actions = list()
+        if(j+1 < self.puzzle_dimension and len(state[i][j+1]) != 2):
+            if((state[i][j+1])[-3] != "n" and (state[i][j+1])[0] != "i"  and (state[i][j+1])[0] != "g"):
+                actions.append((i,j,"right",condition))
+        if(0 <= i-1 and len(state[i-1][j]) != 2):
+            if((state[i-1][j])[-3] != "n" and (state[i-1][j])[0] != "i"  and (state[i-1][j])[0] != "g"):
+                actions.append((i,j,"up",condition))
+        if( 0 <= j-1 and len(state[i][j-1]) != 2):
+            if((state[i][j-1])[-3] != "n" and (state[i][j-1])[0] != "i"  and (state[i][j-1])[0] != "g"):
+                actions.append((i,j,"left",condition))
+        if(i+1 < self.puzzle_dimension and len(state[i+1][j]) != 2):
+            if((state[i+1][j])[-3] != "n" and (state[i+1][j])[0] != "i"  and (state[i+1][j])[0] != "g"):
+                actions.append((i,j,"down",condition))
+        return actions
     def goal_test(self, state):
         """Return  True if the state is a goal"""
         return self.isSolution(state)
@@ -155,7 +205,9 @@ class RTBProblem(search.Problem):
         if (0 <= j < self.puzzle_dimension) and (0 <= i < self.puzzle_dimension):     
             current = self.board[i][j].split("-")
             prev = reverse(next)
-            if current[0] == prev:
+            if len(current) == 2:
+                return i, j, "no"
+            elif current[0] == prev:
                 next = current[1]
             elif current[1] == prev:
                 next = current[0]
@@ -196,13 +248,15 @@ if __name__ == '__main__':
     #for files in listdir("teste"):
         #if files[-3:] == "dat":
             #files
-    with open("teste/"+"pub10.dat","r") as fh:
+    with open("teste/"+"pub05.dat","r") as fh:
         #print(files)
         start_time = time.time()
         teste = RTBProblem()
         teste.setAlgorithm()
         teste.load(fh)
+        print(teste.initial)
         print(teste.solve())
-        #print(f"No ficheiro {files} demorou {time.time()-start_time}")
+
+            #print(f"No ficheiro {files} demorou {time.time()-start_time}")
 
 
