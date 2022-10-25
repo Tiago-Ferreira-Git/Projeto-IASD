@@ -1,5 +1,6 @@
+from os import listdir
 import search
-
+import time
 
 """
 Name of the class: RTBProblem
@@ -26,7 +27,7 @@ class RTBProblem(search.Problem):
     
     def __init__(self) -> None:
         self.initial = ()
-      
+    
     def load(self, fh):
         """
         Name of the method: Load.
@@ -68,7 +69,9 @@ class RTBProblem(search.Problem):
                     j = 0
                     for word in words:
                         if word[0] == "i":
-                                self.initial_index = (i,j)
+                            self.initial_index = (i,j)
+                        if word[0] == "g":
+                            self.goal_index = (i,j)
                         if word[0] == "e":
                             empty_counter += 1
                             if not initial:
@@ -133,10 +136,38 @@ class RTBProblem(search.Problem):
                 empty_counter += 1                    
             if n_empty == empty_counter: break
         
+    def h(self,node):
+        to_determine = self.h_determinate(node.state)
+        return 1/to_determine
+
+    def h_determinate(self, state):
+        counter = 1
+        i,j = self.initial_index
+        # find where the next tile in path must be
+        next = state[(i*self.puzzle_dimension)+j][1]
+        # move search to the next tile
+        while next != 'x' and next != 'g':
+            i, j, next = self.Check(i, j, next, state)
+            counter += 1
+
+        i,j = self.goal_index
+        next = state[(i*self.puzzle_dimension)+j][1]
+        # move search to the next tile
+        while next != 'x' and next != 'g':
+            i, j, next = self.Check(i, j, next, state)
+            counter += 1
+
+
+
+
+
+        return counter
+
 
     def setAlgorithm(self):
         """Sets the uninformed search algorithm chosen"""    
-        self.algorithm = search.iterative_deepening_search
+        self.algorithm = search.astar_search
+
 
     def solve(self):
         """Calls the uninformed search algorithm chosen. """
@@ -168,6 +199,7 @@ class RTBProblem(search.Problem):
         # move search to the next tile
         while next != 'x' and next != 'g':
             i, j, next = self.Check(i, j, next, state)
+
         if next == 'x':
             return False
         elif next == 'g':
@@ -213,3 +245,14 @@ class RTBProblem(search.Problem):
                 return i, j,'x'
         else:
             return 0,0,'x'
+if __name__ == '__main__':
+    for files in listdir("teste"):
+        if files[-3:] == "dat":
+            with open("teste/"+files,"r") as fh:
+                #print(files)
+                start_time = time.time()
+                teste = RTBProblem()
+                teste.setAlgorithm()
+                teste.load(fh)
+                teste.solve()
+                print(f"No ficheiro {files} demorou {time.time()-start_time}")
