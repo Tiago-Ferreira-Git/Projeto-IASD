@@ -138,7 +138,7 @@ class RTBProblem(search.Problem):
         
     def h(self,node):
         to_determine = self.h_determinate(node.state)
-        return 1/to_determine
+        return self.puzzle_dimension**2/to_determine
 
     def h_determinate(self, state):
         counter = 1
