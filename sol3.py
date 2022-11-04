@@ -176,21 +176,38 @@ class RTBProblem(search.Problem):
         Because the term "1/counter" is always smaller than 1, it does not affect the
         results above.
         """
-        cnt = 0
         state = node.state
+        less = 999
         i1,j1 = self.initial_index
-        next = state[(i1*self.puzzle_dimension)+j1][1]
+        next = state[(i1*self.puzzle_dimension)+j1][1] 
         while next != 'x' and next != 'g':
-            i1, j1, next = self.Check(i1, j1, next, state)
-            cnt+=1
+            i1, j1, next, prev = self.Check(i1, j1, next, state)
 
-        i2,j2 = self.goal_index
-        next = state[(i2*self.puzzle_dimension)+j2][1]
-        while next != 'x' and not(i1 == i2 and j1==j2):
-            i2, j2, next = self.Check(i2, j2, next, state)
-            cnt+=1
+        if prev == 'l':
+            next = 'r'
+        elif prev == 'r':
+            next = 'l'
+        elif prev == 't':
+            next = 'd'
+        else:
+            next = 't'    
+        for i, cell in enumerate(state):
+            if(cell[2] != "n" and cell[0] != "i"  and cell[0] != "g" and cell[0] != "e"):
+                if cell[0] == next or cell[1] == next:
+                    ip, jp = i/self.puzzle_dimension, i%self.puzzle_dimension
+                    l1 = abs(i1-ip)+abs(j1-jp)
+                    if l1 < less:
+                        less = l1
 
-        return abs(i1-i2)+abs(j1-j2) + 1/cnt
+        return less
+
+        # i2,j2 = self.goal_index
+        # next = state[(i2*self.puzzle_dimension)+j2][1]
+        # while next != 'x' and not(i1 == i2 and j1==j2):
+        #     i2, j2, next = self.Check(i2, j2, next, state)
+
+
+        # return abs(i1-i2)+abs(j1-j2) + 1/cnt
 
 
     def setAlgorithm(self):
@@ -227,7 +244,7 @@ class RTBProblem(search.Problem):
         next = state[(i*self.puzzle_dimension)+j][1]
         # move search to the next tile
         while next != 'x' and next != 'g':
-            i, j, next = self.Check(i, j, next, state)
+            i, j, next, _ = self.Check(i, j, next, state)
 
         if next == 'x':
             return False
@@ -269,13 +286,13 @@ class RTBProblem(search.Problem):
 
         if (0 <= j_ < self.puzzle_dimension) and (0 <= i_ < self.puzzle_dimension):
             if state[(i_*self.puzzle_dimension)+j_][0] == prev:
-                return (i_, j_, state[(i_*self.puzzle_dimension)+j_][1])
+                return (i_, j_, state[(i_*self.puzzle_dimension)+j_][1], prev)
             elif state[(i_*self.puzzle_dimension)+j_][1] == prev:
-                return (i_, j_, state[(i_*self.puzzle_dimension)+j_][0])
+                return (i_, j_, state[(i_*self.puzzle_dimension)+j_][0], prev)
             else:
-                return (i, j,'x')
+                return (i_, j_,'x', prev)
         else:
-            return (i,j,'x')
+            return (i,j,'x', prev)
 
 if __name__ == '__main__':
     for files in listdir("teste"):
